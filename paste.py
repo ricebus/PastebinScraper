@@ -3,7 +3,8 @@ import json
 
 
 class Paste:
-    def __init__(self, author, title, content, date):
+    def __init__(self, id, author, title, content, date):
+        self.id = id
         self.author = author
         self.title = title
         self.date = date
@@ -49,7 +50,17 @@ class Paste:
 
 class PasteEncoder(json.JSONEncoder):
     def default(self, o):
+        if type(o) is list:
+            res = []
+            for paste in o:
+                res.append(PasteEncoder.make_dict(paste))
+            return res
+        else:
+            return PasteEncoder.make_dict(o)
+
+    def make_dict(o):
         dict = {
+            "id": o.id,
             "author": o.author,
             "title": o.title,
             "date": o.date,

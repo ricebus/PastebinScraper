@@ -27,6 +27,8 @@ class Scraper:
 
     def run(self):
         html = self.s.get(self.base_url)
+        if html.text.find("Pastebin.com has blocked your IP") != -1:
+            raise ConnectionRefusedError("Pastebin.com has blocked your IP")
         return self.parse_main_page(html.text)
 
     def parse_main_page(self, html):
@@ -37,15 +39,18 @@ class Scraper:
         for li in li_tags_list.next_siblings:
             link = li.a.get("href")
             paste_page_html = self.s.get(self.base_url + link)
-            paste = self.parse_paste_page(paste_page_html.text)
+            print(self.base_url + link)
+            paste = self.parse_paste_page(paste_page_html.text, link.strip("/"))
             if paste is not None:
                 pastes.append(paste)
 
         return pastes
 
-    def parse_paste_page(self, html):
+    def parse_paste_page(self, html, id):
         soup = bs(html, 'html.parser')
-        removed = True if soup.find_all("div", "content_title")[0].text.find("removed") != -1 else False
+        removed = True if soup.find_all("div", "content_title")[0] \
+                              .text.find("removed") != -1 \
+            else False
         if removed:
             return None
 
@@ -58,4 +63,4 @@ class Scraper:
         author = info_line.a.text \
             if info_line.text.lower().find("guest") == -1 \
             else "guest"
-        return Paste(author, title, content, date)
+        return Paste(id, author, title, content, date)
