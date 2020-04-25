@@ -30,9 +30,12 @@ class Scraper:
         soup = bs(html.text, 'html.parser')
         paste_list = soup.find_all("ul", "right_menu")[0]
         li_tags_list = paste_list.li
+        pastes = []
         for li in li_tags_list.next_siblings:
             link = li.a.get("href")
-            self.parse_paste_page(link)
+            pastes.append(self.parse_paste_page(link))
+
+        return pastes
 
     def parse_paste_page(self, link):
         html = self.s.get(self.base_url + link)

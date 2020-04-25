@@ -3,10 +3,10 @@ import arrow
 
 class Paste:
     def __init__(self, author, title, content, date):
-        self._author = author
-        self._title = title
-        self._date = date
-        self._content = content
+        self.author = author
+        self.title = title
+        self.date = date
+        self.content = content
 
     @property
     def author(self):
@@ -42,4 +42,5 @@ class Paste:
 
     @date.setter
     def date(self, date):
-        self._date = arrow.get(date, "Do of MMMM YYYY hh:mm:ss A")
+        date_arrow = arrow.get(date, "Do of MMMM YYYY hh:mm:ss A")
+        self._date = date_arrow.format('YYYY-MM-DD HH:mm:ss ZZ')
