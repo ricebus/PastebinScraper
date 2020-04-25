@@ -38,9 +38,9 @@ class Scraper:
         pastes = []
         for li in li_tags_list.next_siblings:
             link = li.a.get("href")
-            paste_page_html = self.s.get(self.base_url + link)
+            page_html = self.s.get(self.base_url + link)
             print(self.base_url + link)
-            paste = self.parse_paste_page(paste_page_html.text, link.strip("/"))
+            paste = self.parse_paste_page(page_html.text, link.strip("/"))
             if paste is not None:
                 pastes.append(paste)
 

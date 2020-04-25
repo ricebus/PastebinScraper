@@ -29,10 +29,9 @@ def save_to_db(pastes, connection_string):
     from pymongo.errors import ConnectionFailure
     try:
         col = prepare_db(connection_string)
-        new_pastes = remove_existing_pastes(col,pastes)
+        new_pastes = remove_existing_pastes(col, pastes)
         dict = PasteEncoder.default(None, new_pastes)
         if len(dict) != 0:
-            print(dict)
             col.insert_many(dict)
         return True
     except ConnectionFailure:
@@ -48,9 +47,12 @@ def prepare_db(connection_string):
     col.create_index("id", unique=True)
     return col
 
+
 def remove_existing_pastes(col, pastes):
-    clean = [paste for paste in pastes if col.find_one({"id": paste.id}) is None]
+    clean = [paste for paste in pastes
+             if col.find_one({"id": paste.id}) is None]
     return clean
+
 
 def save_to_file(pastes, path=""):
     try:
