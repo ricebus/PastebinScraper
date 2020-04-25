@@ -25,26 +25,37 @@ class Scraper:
         else:
             self.s.headers.update(headers)
 
-    def parse_main_page(self):
+    def run(self):
         html = self.s.get(self.base_url)
-        soup = bs(html.text, 'html.parser')
+        return self.parse_main_page(html.text)
+
+    def parse_main_page(self, html):
+        soup = bs(html, 'html.parser')
         paste_list = soup.find_all("ul", "right_menu")[0]
         li_tags_list = paste_list.li
         pastes = []
         for li in li_tags_list.next_siblings:
             link = li.a.get("href")
-            pastes.append(self.parse_paste_page(link))
+            paste_page_html = self.s.get(self.base_url + link)
+            paste = self.parse_paste_page(paste_page_html.text)
+            if paste is not None:
+                pastes.append(paste)
 
         return pastes
 
-    def parse_paste_page(self, link):
-        html = self.s.get(self.base_url + link)
-        soup = bs(html.text, 'html.parser')
+    def parse_paste_page(self, html):
+        soup = bs(html, 'html.parser')
+        removed = True if soup.find_all("div", "content_title")[0].text.find("removed") != -1 else False
+        if removed:
+            return None
+
         info_box = soup.find_all("div", "paste_box_info")[0]
         info_line = info_box.find_all("div", "paste_box_line2")[0]
         paste_box = soup.find_all("div", "textarea_border")[0]
         title = info_box.find_all("div", "paste_box_line1")[0].text
-        author = info_line.a.text
         date = info_line.span.get("title")
         content = paste_box.textarea.text
+        author = info_line.a.text \
+            if info_line.text.lower().find("guest") == -1 \
+            else "guest"
         return Paste(author, title, content, date)

@@ -1,4 +1,5 @@
 import arrow
+import json
 
 
 class Paste:
@@ -14,7 +15,7 @@ class Paste:
 
     @author.setter
     def author(self, author):
-        if(author.lower() == "a guest"):
+        if(author.lower() == "guest"):
             author = ""
         self._author = author
 
@@ -44,3 +45,15 @@ class Paste:
     def date(self, date):
         date_arrow = arrow.get(date, "Do of MMMM YYYY hh:mm:ss A")
         self._date = date_arrow.format('YYYY-MM-DD HH:mm:ss ZZ')
+
+
+class PasteEncoder(json.JSONEncoder):
+    def default(self, o):
+        dict = {
+            "author": o.author,
+            "title": o.title,
+            "date": o.date,
+            "content": o.content
+        }
+
+        return dict

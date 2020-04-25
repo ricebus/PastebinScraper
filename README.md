@@ -7,3 +7,4 @@ python main.py
 
 # Docker (from project dir)
 docker build -t python-pastebin-scraper .
+docker pull mongo:3-xenial
