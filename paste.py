@@ -1,5 +1,6 @@
 import arrow
 
+
 class Paste:
     def __init__(self, author, title, content, date):
         self._author = author
