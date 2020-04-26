@@ -18,7 +18,7 @@ sudo docker run -d -p 27017-27019:27017-27019 \
 docker run -d \
 -e SCRAPER_MODE="db" \
 -e SCRAPER_CONN_STRING="mongodb://container_id:27017/" \
---name scraper python-pastebin-scraper:latest
+--name scraper --link mongodb python-pastebin-scraper:latest
 ```
 
 # NOTE
