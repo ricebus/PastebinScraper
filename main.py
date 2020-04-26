@@ -15,7 +15,7 @@ connection_string = os.environ["SCRAPER_CONN_STRING"] \
 tl = Timeloop()
 
 
-@tl.job(interval=timedelta(seconds=2))
+@tl.job(interval=timedelta(minutes=2))
 def scrape_job_every_2m():
     print("scrape job current time: {}".format(time.ctime()))
     scraper = Scraper()
