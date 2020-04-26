@@ -2,9 +2,10 @@ import time
 from timeloop import Timeloop
 from datetime import timedelta
 from scraper import Scraper
-from paste import PasteEncoder
-import json
 import os
+from pastesaver.db import DB
+from pastesaver.file import File
+from pymongo.errors import ConnectionFailure
 
 mode = "db" if "SCRAPER_MODE" in os.environ and \
                os.environ["SCRAPER_MODE"].lower() == "db" else "file"
@@ -19,53 +20,14 @@ def scrape_job_every_2m():
     print("scrape job current time: {}".format(time.ctime()))
     scraper = Scraper()
     pastes = scraper.run()
-    if mode == "file":
-        save_to_file(pastes)
-    else:
-        save_to_db(pastes, connection_string)
+    saver = DB() if mode == "file" else File()
 
-
-def save_to_db(pastes, connection_string):
-    from pymongo.errors import ConnectionFailure
     try:
-        col = prepare_db(connection_string)
-        new_pastes = remove_existing_pastes(col, pastes)
-        dict = PasteEncoder.default(None, new_pastes)
-        if len(dict) != 0:
-            col.insert_many(dict)
-        return True
+        saver.save(pastes)
     except ConnectionFailure:
         print("MongoDB connection error")
-        return False
-
-
-def prepare_db(connection_string):
-    import pymongo
-    mongo = pymongo.MongoClient(connection_string)
-    db = mongo["pastedb"]
-    col = db["pastes"]
-    col.create_index("id", unique=True)
-    return col
-
-
-def remove_existing_pastes(col, pastes):
-    clean = [paste for paste in pastes
-             if col.find_one({"id": paste.id}) is None]
-    return clean
-
-
-def save_to_file(pastes, path=""):
-    try:
-        filename = "pastes" + time.strftime("%Y-%m-%d.%H-%M-%S") + ".json"
-        location = os.path.join(path, filename)
-        f = open(location, "a")
-        json_array = json.dumps(pastes, cls=PasteEncoder)
-        f.write(json_array)
-        f.close()
-        return True
     except PermissionError:
-        print("File permission error (" + location + ")")
-        return False
+        print("File permission error")
 
 
 if __name__ == "__main__":
