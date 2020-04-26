@@ -20,7 +20,7 @@ def scrape_job_every_2m():
     print("scrape job current time: {}".format(time.ctime()))
     scraper = Scraper()
     pastes = scraper.run()
-    saver = DB() if mode == "file" else File()
+    saver = DB() if mode == "db" else File()
 
     try:
         saver.save(pastes)
